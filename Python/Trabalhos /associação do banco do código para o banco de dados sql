@@ -1,0 +1,62 @@
+import mysql.connector
+# Conectar ao banco de dados
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="rootroot",
+  database="f4you"
+)
+
+
+# Criação de tabela de contas
+mycursor = mydb.cursor()
+
+#mycursor.execute("CREATE TABLE contas (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255), email VARCHAR(255), senha VARCHAR(255))")
+
+# Cadastro de uma nova conta
+def cadastrar_conta(nome, email, senha):
+  mycursor = mydb.cursor()
+
+  # Verificar se o e-mail já foi cadastrado antes
+  sql = "SELECT * FROM contas WHERE email = %s"
+  val = (email, )
+
+  mycursor.execute(sql, val)
+
+  conta_existente = mycursor.fetchone()
+
+  if conta_existente:
+    print("O e-mail já foi cadastrado. Tente novamente com outro endereço de e-mail.")
+    return
+
+  # Inserir a nova conta no banco de dados
+  sql = "INSERT INTO contas (nome, email, senha) VALUES (%s, %s, %s)"
+  val = (nome, email, senha)
+
+  mycursor.execute(sql, val)
+
+  mydb.commit()
+
+  print("Conta criada com sucesso!")
+
+# Verificação de login
+def login(email, senha):
+  mycursor = mydb.cursor()
+
+  # Verificar se a conta existe no banco de dados
+  sql = "SELECT * FROM contas WHERE email = %s AND senha = %s"
+  val = (email, senha)
+
+  mycursor.execute(sql, val)
+
+  conta = mycursor.fetchone()
+
+  if conta:
+    print("Bem-vindo,", conta[1])
+  else:
+    print("E-mail ou senha incorretos. Tente novamente.")
+
+# Exemplo de uso
+cadastrar_conta("João Silva", "joao.silva@example.com", "minhasenha123")
+login("joao.silva@example.com", "minhasenha123")
+mydb.close()
